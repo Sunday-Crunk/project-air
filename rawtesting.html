@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>List Component Demo</title>
+<script type="module">
+class AirComponent {
+  constructor(tagName, componentFunction) {
+    this.tagName = tagName;
+    this.componentFunction = componentFunction;
+    this.initialize();
+  }
+
+  initialize() {
+    // Define the custom element
+    customElements.define(this.tagName, class extends HTMLElement {
+      constructor() {
+        super();
+        // Ensure the componentFunction is a function and call it with the element instance
+        if (typeof this.componentFunction === 'function') {
+          this.update = this.componentFunction(this); // Initialize component logic
+        } else {
+          throw new Error('Component function must be a function');
+        }
+        this.attachShadow({ mode: 'open' });
+      }
+
+      connectedCallback() {
+        this.render();
+        this.mounted();
+      }
+
+      disconnectedCallback() {
+        this.unmounted();
+      }
+
+      mounted() {
+        console.log(`${this.tagName} mounted!`);
+      }
+
+      unmounted() {
+        console.log(`${this.tagName} unmounted!`);
+      }
+
+      render() {
+        this.shadowRoot.innerHTML = '';
+        this.shadowRoot.appendChild(this.update());
+      }
+    });
+  }
+}
+
+const html = (strings, ...values) => {
+  const template = document.createElement('template');
+  template.innerHTML = strings.map((str, i) => `${str}${values[i] || ''}`).join('');
+  return template.content.cloneNode(true);
+};
+
+const createState = (initialValue) => {
+  let value = initialValue;
+  const handlers = new Set();
+
+  const getValue = () => value;
+
+  const setValue = (newValue) => {
+    value = newValue;
+    handlers.forEach(handler => handler());
+  };
+
+  const subscribe = (handler) => {
+    handlers.add(handler);
+    handler(); // Initial call
+    return () => handlers.delete(handler);
+  };
+
+  return [getValue, setValue, subscribe];
+};
+
+// Instantiate AirComponent with the 'list-component' tag and component logic
+new AirComponent('list-component', function(elem) {
+  const [items, setItems, subscribeItems] = createState([
+    { id: 1, text: 'Item 1' },
+    { id: 2, text: 'Item 2' },
+    { id: 3, text: 'Item 3' },
+  ]);
+  const addItem = () => {
+    const newItem = { id: items().length + 1, text: `Item ${items().length + 1}` };
+    setItems([...items(), newItem]);
+  };
+
+  const removeItem = (id) => {
+    const updatedItems = items().filter(item => item.id !== id);
+    setItems(updatedItems);
+  };
+
+  subscribeItems(() => elem.render());
+
+  return () => html`
+    <div>
+      <h1>List of Items</h1>
+      <ul>
+        ${items().map(item => html`
+          <li>
+            ${item.text}
+            <button onclick=${() => removeItem(item.id)}>Remove</button>
+          </li>
+        `)}
+      </ul>
+      <button onclick=${addItem}>Add Item</button>
+    </div>
+  `;
+});
+</script>
+</head>
+<body>
+<list-component></list-component>
+</body>
+</html>

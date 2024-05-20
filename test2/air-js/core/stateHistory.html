@@ -1,0 +1,697 @@
+
+<div>
+  <style>
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f1f1f1;
+}
+
+#control-panel {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: rgb(57 57 57 / 80%);
+    border-radius: 10px;
+    color: white;
+    padding: 1em;
+    z-index: 1000;
+    width: 350px; /* Fixed width to match the canvas */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    user-select: none;
+    overflow: hidden; /* Ensures nothing overflows the boundary of the panel */
+}
+
+
+
+.slider {
+    width: 100%;
+}
+
+button, input {
+    margin-right: 5px;
+    padding: 5px 9px;
+    border: none;
+    background-color: #555;
+    color: white;
+    border-radius: 5px;
+}
+
+button:hover, input:hover {
+    background-color: #777;
+}
+.checked{
+  background-color:#777;
+}
+#current-value-display {
+    color: #fff;
+    margin-top: 10px;
+    white-space: pre; /* Keeps formatting of new lines */
+}
+#data-timeline{
+  width:98.5%;
+  margin-top:0.5em;
+  padding:0.2em;
+  padding-top:0.3em;
+  border:solid #b5b5b5 0.2em;
+  border-radius:0.5em;
+  background: #41595a;
+}
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 50%;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+.button-controls{
+  display:flex;
+  justify-content:center;
+  padding:0.2em;
+  margin:0.3em;
+
+
+}
+.controls-container{
+    background: #888484;
+    border:solid #645858 2px;
+  border-radius:0.5em;
+  padding:0.2em;
+  margin-bottom:0.3em;
+  margin-top:0.3em;
+  display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.controls-container input[type="range"]{
+  width:90%;
+  position:relative;
+      padding: 0;
+}
+#current-step-display {
+    text-align: center;
+    color: #fff;
+    padding: 10px 0;
+}
+#current-value-display{
+  background: gray;
+  padding:0.5em;
+  border-radius:0.5em;
+  display: flex;
+    flex-direction: column;
+}
+.display-text{
+  display:inline-flex;
+  margin:0.1em;
+}
+.display-text div{
+  margin-left:0.2em;
+}
+#current-step-display{
+      text-align: center;
+    color: #fff;
+    padding: 10px 0;
+    background: #898886;
+    margin-bottom: 0.3em;
+    border-radius: 0.5em;
+}
+.display-state-name{
+  padding:0.2em;
+  background:#595959;
+  border-radius:0.3em;
+  font-size:small;
+}
+.display-state-Text{
+   background:#595959;
+  padding-right:0.3em;
+  border-radius:0.2em;
+  font-size:0.8em;
+  display: flex;
+    align-items: center;
+}
+#drag-area-buttons{
+  width: fit-content;
+
+}
+#drag-area {
+    cursor: move;
+    background-color: #333;
+    padding: 10px;
+    text-align: center;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    display:flex;
+  justify-content: space-between;
+    align-items: center;
+}
+.app-title{
+  width: fit-content;
+  pointer-events: none;
+}
+#resize-handle {
+     width: 10px;
+    height: 10px;
+    background-color: #333;
+    border-radius: 50%;
+    cursor: se-resize;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0.45em;
+}
+.heat-slider--h {
+	 display: flex;
+	 align-items: center;
+}
+ .heat-slider--h .heat-slider--label + * {
+	 margin-left: 1em;
+	 flex: 1;
+}
+ .heat-slider--v {
+	 display: flex;
+	 flex-direction: column;
+	 justify-content: center;
+}
+ .heat-slider--v .heat-slider--label + * {
+	 margin-top: 1em;
+	 flex: 1;
+}
+ .heat-slider {
+	 --slider-base: #d8d8d8;
+	 --turquoise-light: #66d8cf;
+	 --turquoise-base: #1abc9c;
+	 --turquoise-dark: #3ca28d;
+	 --slider-radius: 1em;
+	 --slider-handle-size: 1em;
+	 --p: 0%;
+}
+ .heat-slider--input {
+	 position: relative;
+	 line-height: 0;
+	 border-radius: var(--slider-radius);
+	 background-image: linear-gradient(to right, var(--turquoise-light), var(--turquoise-base), var(--turquoise-dark));
+	 background-size: 300% 100%;
+	 animation: shiftGradient 4s ease-in-out infinite;
+}
+ .heat-slider--input::before {
+	 content: '';
+	 position: absolute;
+	 pointer-events: none;
+	 top: 0;
+	 right: 0;
+	 bottom: 0;
+	 left: 0;
+	 margin-right: -1px;
+	 border-radius: var(--slider-radius);
+	 background: linear-gradient(to right, transparent 0, transparent calc(var(--p) + var(--slider-handle-size) / 2), var(--slider-base) var(--p), var(--slider-base) 100%);
+}
+ .heat-slider--input input {
+	 position: realtive;
+	 z-index: 1;
+	 width: 100%;
+	 appearance: none;
+	 font: inherit;
+	 background: transparent;
+	 border: 0;
+	 margin: 0;
+	 padding: 0;
+}
+ .heat-slider--input input::-webkit-slider-runnable-track {
+	 background: transparent;
+	 padding: calc(var(--slider-handle-size) / 1.6) 0;
+	 margin: 0 calc(var(--slider-handle-size) / 2 * -1);
+	 cursor: pointer;
+}
+ .heat-slider--input input::-moz-range-track {
+	 background: transparent;
+	 padding: calc(var(--slider-handle-size) / 1.6) 0;
+	 margin: 0 calc(var(--slider-handle-size) / 2 * -1);
+	 cursor: pointer;
+}
+ .heat-slider--input input::-webkit-slider-thumb {
+	 position: relative;
+	 appearance: none;
+	 box-shadow: 0 0 0 0.1em #444;
+	 height: calc(var(--slider-handle-size) * 1.6);
+	 width: var(--slider-handle-size);
+	 margin: calc(var(--slider-handle-size) * -0.8) 0;
+	 border-radius: var(--slider-radius, 1em);
+	 background: white;
+	 cursor: grab;
+	 left: 0.1em;
+}
+ .heat-slider--input input::-moz-range-thumb {
+	 position: relative;
+	 appearance: none;
+	 box-shadow: 0 0 0 0.1em #444;
+	 height: calc(var(--slider-handle-size) * 2);
+	 width: var(--slider-handle-size);
+	 margin: calc(var(--slider-handle-size) * -1) 0;
+	 border-radius: var(--slider-radius, 1em);
+	 background: white;
+	 cursor: grab;
+	 left: 0.1em;
+}
+ .heat-slider--input input:focus {
+	 outline: none;
+}
+ .heat-slider--input input:active::-webkit-slider-thumb {
+	 position: relative;
+	 appearance: none;
+	 box-shadow: 0 0 0 0.1em #444;
+	 height: calc(var(--slider-handle-size) * 2);
+	 width: var(--slider-handle-size);
+	 margin: calc(var(--slider-handle-size) * -1) 0;
+	 border-radius: var(--slider-radius, 1em);
+	 background: white;
+	 cursor: grabbing;
+	 left: 0.1em;
+}
+ .heat-slider--input input:active::-moz-range-thumb {
+	 position: relative;
+	 appearance: none;
+	 box-shadow: 0 0 0 0.1em #444;
+	 height: calc(var(--slider-handle-size) * 2);
+	 width: var(--slider-handle-size);
+	 margin: calc(var(--slider-handle-size) * -1) 0;
+	 border-radius: var(--slider-radius, 1em);
+	 background: white;
+	 cursor: grabbing;
+	 left: 0.1em;
+}
+ @keyframes shiftGradient {
+	 0%, 100% {
+		 background-position: 0% 50%;
+	}
+	 50% {
+		 background-position: 100% 50%;
+	}
+}
+ *, *::before, *::after {
+	 box-sizing: border-box;
+}
+.output {
+	 margin: 1em;
+
+	text-align:center;
+
+	 opacity: 0.4;
+	
+}
+#timeScrubber{
+  margin-top:0.5em;
+}
+  </style>
+
+
+  <div>
+    <div id="control-panel">
+        <div id="drag-area" class="handle">
+          <div class="app-title">State Timeline</div>
+          <div id="drag-area-buttons">
+            <button id="minimise">-</button>
+          </div>
+        </div>
+      <div class="controls-container">
+      <div class="button-controls">
+    <button id="prevButton">Prev</button>
+    <button id="playButton">Play</button>
+    <button id="pauseButton">Pause</button>
+    <button id="stopButton">Stop</button>
+    <button id="nextButton">Next</button>
+        <button id="loopButton">⟳</button>
+</div>
+        <span style="font-size:small;">Playback Speed</span>
+      <input id="inverseSlider" type="range" min="20" max="1500"/>
+        </div>
+<div id="current-step-display">Move the slider to scrub through time</div>
+        <div id="timeScrubber">
+<label class="heat-slider heat-slider--v">
+
+	<span  class="heat-slider--input">
+		<input id="timeline-slider"type="range" value="0" min="0"  oninput="updateSlider(event)"/>
+	</span>
+</label>
+	</div>
+        <div id="current-value-display"></div>
+        <canvas id="data-timeline" width="800" height="150"></canvas>
+           <div id="resize-handle"></div>
+    </div>
+  <!-- Modal for displaying object details -->
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <pre id="modal-text"></pre>
+    </div>
+</div>
+
+    <script>
+   document.addEventListener('DOMContentLoaded', function () {
+    const controlPanel = document.getElementById('control-panel');
+    const canvas = document.getElementById('data-timeline');
+    const ctx = canvas.getContext('2d');
+    const playButton = document.getElementById('playButton');
+    const pauseButton = document.getElementById('pauseButton');
+    const stopButton = document.getElementById('stopButton');
+    const timelineSlider = document.getElementById('timeline-slider');
+    const currentValueDisplay = document.getElementById('current-value-display');
+   const prevButton = document.getElementById('prevButton');
+    const nextButton = document.getElementById('nextButton');
+    const currentStepDisplay = document.getElementById('current-step-display');
+    const dragArea = document.getElementById('drag-area');
+  const resizeHandle = document.getElementById('resize-handle');
+    const modal = document.getElementById('modal');
+    const modalText = document.getElementById('modal-text');
+    const closeModal = document.getElementsByClassName("close")[0];
+  let loopOn = false
+  const loopOnButton = document.querySelector("#loopButton")
+  loopOnButton.addEventListener("click", e=>{
+    console.log("do")
+    if (loopOn === false){
+      loopOn = true
+    }else{
+      loopOn = false
+    }
+    loopOnButton.classList.toggle("checked")
+  })
+    let isPlaying = false;
+    let currentFrame = 0;
+
+    const values = [
+        ["The ", "The L", "The La", "The Law", "The Law ", "The Law S", "The Law So", "The Law Soc", "The Law Soci", "The Law Socie", "The Law Societ", "The Law Society", "The Law Society ", "The Law Society o", "The Law Society of", "The Law Society of ", "The Law Society of U", "The Law Society of Up", "The Law Society of Upp", "The Law Society of Uppe"],
+        [{name: "Object1"}, null, null, "x", {id: 2, value: "example"}, "x", "xxxx", null, null, null, null, null, null, "x", "xx", null, {number: 123}, "xxxx", "xxxxx", "xxxxxx"],
+        ["y", {details: "More details"}, "yyy", "yy", "y", null, null, "y", null, null, "yy", "yyy", "yyyy", "y", "y", "yy", null, "yyy", null, "y"]
+    ];
+  
+  // Make the control panel draggable
+let isDragging = false;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+
+controlPanel.addEventListener('mousedown', (e) => {
+  if (e.target !== dragArea) return;
+  isDragging = true;
+  dragOffsetX = e.offsetX;
+  dragOffsetY = e.offsetY;
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  controlPanel.style.left = e.clientX - dragOffsetX + 'px';
+  controlPanel.style.top = e.clientY - dragOffsetY + 'px';
+});
+
+document.addEventListener('mouseup', () => {
+  isDragging = false;
+});
+  
+  // Make the control panel resizable
+let isResizing = false;
+let startWidth = 0;
+let startHeight = 0;
+let startMouseX = 0;
+let startMouseY = 0;
+
+resizeHandle.addEventListener('mousedown', (e) => {
+  isResizing = true;
+  startWidth = controlPanel.offsetWidth;
+  startHeight = controlPanel.offsetHeight;
+  startMouseX = e.clientX;
+  startMouseY = e.clientY;
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (!isResizing) return;
+  // Calculate the new width and height based on the movement
+  const newWidth = startWidth - (e.clientX - startMouseX);
+  const newHeight = startHeight - (e.clientY - startMouseY);
+
+  // Set the new width and height
+  controlPanel.style.width = newWidth + 'px';
+  controlPanel.style.height = newHeight + 'px';
+
+  // Adjust the position of the control panel to move it along with the resizing
+  controlPanel.style.left = e.clientX + 'px';
+  controlPanel.style.top = e.clientY + 'px';
+});
+
+
+document.addEventListener('mouseup', () => {
+  isResizing = false;
+});
+  
+ function setCanvasSizeAndDraw() {
+        canvas.width = controlPanel.offsetWidth; // Match the canvas width with the control panel
+
+        // Calculate and set canvas height based on the number of arrays and the space needed for each plus a gap
+        const segmentHeight = 20;
+        const gap = 3; // Gap between rows
+        canvas.height = values.length * (segmentHeight + gap); // Update canvas height based on contents
+
+        drawTimeline();
+        updateValueDisplay(); // Ensure value display is also updated
+    }
+
+    function drawTimeline() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const numberOfSteps = values[0].length;
+        const segmentWidth = (canvas.width / numberOfSteps);
+        const segmentHeight = 20; // fixed height for each segment
+        const gap = 3; // Gap between rows
+      const cornerRadius = 5; // Radius of rounded corners
+      const gridLineWidth = 0.5;
+        const padding = 2.5; 
+        // Function to draw rounded rectangles
+    function fillRoundRect(x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + width, y, x + width, y + height, radius);
+        ctx.arcTo(x + width, y + height, x, y + height, radius);
+        ctx.arcTo(x, y + height, x, y, radius);
+        ctx.arcTo(x, y, x + width, y, radius);
+        ctx.closePath();
+        ctx.fill();
+    }
+        values.forEach((array, arrayIndex) => {
+        array.forEach((item, index) => {
+            if (item !== null) {
+                const byteSize = typeof item === 'string' ? new Blob([item]).size : 10;
+                const hue = 120 - (byteSize * 10);
+                const color = `hsl(${hue}, 70%, 50%)`;
+                ctx.fillStyle = color;
+
+               
+                const width = segmentWidth - (2 * padding) - 2;
+                const height = segmentHeight - (2 * padding);
+// Calculate the centered position within the cell (CORRECTED)
+                const x = (index * segmentWidth) + (segmentWidth - width) / 2;
+                const y = (arrayIndex * (segmentHeight + gap)) + (gap / 2) + (segmentHeight - height) / 2;
+
+                fillRoundRect(x, y, width, height, cornerRadius);
+            }
+        });
+    });
+          // Draw Grid (NEW)
+  ctx.strokeStyle = 'navy';
+  ctx.lineWidth = gridLineWidth;
+  ctx.beginPath(); // Start drawing the lines
+
+  // Vertical Lines (except on edges)
+  for (let i = 1; i < numberOfSteps; i++) {
+    const x = i * segmentWidth;
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvas.height);
+  }
+
+  // Horizontal Lines (except on edges)
+  for (let i = 1; i < values.length; i++) {
+    const y = i * (segmentHeight + gap);
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+  }
+
+  ctx.stroke(); // Render the lines
+        // Draw cursor
+        ctx.fillStyle = '#ffffff'; // White cursor
+        ctx.fillRect(currentFrame * segmentWidth, 0, 2, canvas.height);
+    }
+
+    function updateValueDisplay() {
+              let percentage = (currentFrame / (values[0].length-1)) * 100;
+        currentStepDisplay.textContent = `Step ${currentFrame} of ${values[0].length - 1} (${percentage.toFixed(2)}%)`;
+        currentValueDisplay.innerHTML = '';
+        values.forEach((array, arrayIndex) => {
+            const value = array[currentFrame];
+            let displayText = document.createElement('div');
+          displayText.className = "display-text"
+            let displayStateName = document.createElement('div');
+            displayStateName.className = "display-state-name"
+          let displayStateText = document.createElement('div');
+            displayStateText.className = "display-state-Text"
+          displayText.appendChild(displayStateName)
+          displayText.appendChild(displayStateText)
+            if (value !== null && typeof value === 'object' && !(value instanceof String || typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean')) {
+                displayStateName.textContent = `State ${arrayIndex + 1}:`
+                displayStateText.textContent = ` [${value.constructor.name}]`;
+                displayText.onclick = function() {
+                    modal.style.display = "block";
+                    modalText.textContent = JSON.stringify(value, null, 2);
+                };
+            } else {
+              displayStateName.textContent = `State ${arrayIndex + 1}:`
+                displayStateText.textContent = ` ${value || 'None'}`;
+            }
+            currentValueDisplay.appendChild(displayText);
+        });
+    
+    }
+
+    timelineSlider.max = values[0].length - 1;
+    timelineSlider.addEventListener('input', function() {
+        currentFrame = parseInt(this.value, 10);
+        drawTimeline();
+        updateValueDisplay();
+    });
+        const updateBar =() =>{
+      const parent = document.querySelector(".heat-slider--input")
+            const percent = `${((currentFrame / values[0].length) * 100).toFixed(5)}%`
+            //const percent = `${((currentFrame - min)/(max - min) * 100).toFixed(decimals)}%`
+	          parent.style.setProperty('--p', percent)
+    }
+    playButton.addEventListener('click', function() {
+        isPlaying = true;
+        playTimeline();
+    });
+
+    pauseButton.addEventListener('click', function() {
+        isPlaying = false;
+    });
+
+    stopButton.addEventListener('click', function() {
+        isPlaying = false;
+        currentFrame = 0;
+        timelineSlider.value = 0;
+        drawTimeline();
+        updateValueDisplay();
+      updateBar();
+    });
+     // Update display function
+    function updateStepDisplay() {
+  const maxFrame = values[0].length - 1; // Calculate once for efficiency
+  let percentage = Math.max(0, (currentFrame / maxFrame)) * 100; 
+  currentStepDisplay.textContent = `Step ${currentFrame} of ${maxFrame} (${percentage.toFixed(2)}%)`;
+}
+
+
+    // Previous button event listener
+    prevButton.addEventListener('click', function() {
+        if (currentFrame > 0) {
+            currentFrame--;
+            timelineSlider.value = currentFrame;
+            drawTimeline();
+            //updateValueDisplay();
+            updateStepDisplay();
+            updateBar();
+        }
+    });
+
+    // Next button event listener
+    nextButton.addEventListener('click', function() {
+        if (currentFrame < values[0].length - 1) {
+            currentFrame++;
+            timelineSlider.value = currentFrame;
+            drawTimeline();
+            updateValueDisplay();
+            updateStepDisplay();
+          updateBar();
+        }
+    });
+
+    function playTimeline() {
+                  var slider = document.getElementById('inverseSlider');
+  var max = parseInt(slider.max);
+  var min = parseInt(slider.min);
+  var inverseValue = max + min - slider.value;
+        if (isPlaying && currentFrame < values[0].length) {
+            timelineSlider.value = currentFrame;
+            drawTimeline();
+            updateValueDisplay();
+          const parent = document.querySelector(".heat-slider--input")
+            const percent = `${((currentFrame / values[0].length) * 100).toFixed(5)}%`
+            //const percent = `${((currentFrame - min)/(max - min) * 100).toFixed(decimals)}%`
+	          parent.style.setProperty('--p', percent)
+            currentFrame++;
+            
+
+            setTimeout(playTimeline, inverseValue); // Adjust timing here
+        }else if(currentFrame == values[0].length && loopOn){
+          currentFrame=0;
+          timelineSlider.value = currentFrame;
+          drawTimeline();
+            updateValueDisplay();
+          const parent = document.querySelector(".heat-slider--input")
+            const percent = `${((currentFrame / values[0].length) * 100).toFixed(5)}%`
+            //const percent = `${((currentFrame - min)/(max - min) * 100).toFixed(decimals)}%`
+	          parent.style.setProperty('--p', percent)
+          playTimeline()
+        }
+    }
+
+    // Close modal event
+    closeModal.onclick = function() {
+        modal.style.display = "none";
+    };
+
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    };
+
+    // Initial setup and draw
+  updateStepDisplay();
+    setCanvasSizeAndDraw();
+
+});
+const updateSlider = (event) => {
+
+
+	const { value, min, max, step, parentElement: parent } = event.target
+	const decimals = step && step.includes('.') ? step.split('.')[1] : 1
+	const percent = `${((value - min)/(max - min) * 100).toFixed(decimals)}%`
+	parent.style.setProperty('--p', percent)
+
+}
+
+    </script>
+    </div>
+
+</div>
