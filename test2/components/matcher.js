@@ -115,21 +115,13 @@ const exampleData = [
       }
   ]
   export const MemoryBrowser = AirComponent('archive-explorer', function() {
-    this.historyLength = 20;
-    this.timeWalk = true;
-    const [records, setRecords] = createState([], {global: "me", temporal: true});
-    const [searchTerm, setSearchTerm] = createState('',{temporal: true});
+
+    const [records, setRecords] = createState([]);
+    const [searchTerm, setSearchTerm] = createState('');
     const [currentPage, setCurrentPage] = createState(1);
     const [loading, setLoading] = createState(true);
     const [selectedFilter, setSelectedFilter] = createState('');
     const recordsPerPage = 5;
-    const [test, setTest] = createState("cock")
-    setTest(prev=>{
-        console.log("should be cock", prev)
-        return "dong"
-    })
-   
-    test.onUpdate(e=>{console.log("set test: ", e); })
 
     const theme = {
       colors: {
