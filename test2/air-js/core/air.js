@@ -435,7 +435,8 @@ function analyzeCode(code, strictMode = false) {
 
   let usageResults = {};
   variables.forEach(variable => {
-    const regex = new RegExp(`\\b${variable}\\b(?!\\()`, 'g');
+    // This regex captures usage of variable not immediately followed by a function invocation parenthesis
+    const regex = new RegExp(`\\b${variable}\\b(?!\\s*\\()`, 'g');
     let firstOccurrence = true;
     let usages = [];
 
@@ -450,19 +451,23 @@ function analyzeCode(code, strictMode = false) {
       const postVarSnippet = code.slice(postVarIndex).trimStart();
       const nextChar = postVarSnippet[0];
 
-      // Determine validity based on strict or non-strict mode
       let isValid = true; // Assume valid by default
       if (strictMode) {
-        isValid = nextChar === '('; // In strict mode, all usages must invoke
+        isValid = nextChar === '('; // Strict mode requires function call invocations
       } else {
-        // Non-strict mode only concerns logical operations and equality checks
-        isValid = !(/\s*(\?|&&|\|\||==|!=)/.test(postVarSnippet)); // Check for risky logical or equality usage
-        if (/[\+\-\*\/]/.test(postVarSnippet.trim()[0])) {
-          isValid = true; // Allow arithmetic operations in non-strict mode
+        // Check context for template literal interpolation or method call
+        const beforeSnippet = code.substring(0, position);
+        const inTemplateLiteral = beforeSnippet.match(/\$\{[^{}]*$/);
+        if (inTemplateLiteral) {
+          isValid = nextChar === '(' || nextChar === '.'; // Allow method calls or properties access
+        } else if (['['].includes(nextChar)) {
+          isValid = true; // Allow array access without further conditions
+        } else if (!(/\s*(\?|&&|\|\||==|!=)/.test(postVarSnippet))) {
+          isValid = true; // Allow other contexts if not part of a risky logical or equality operation
         }
       }
 
-      // Find the full line by searching for nearest line breaks around the match
+      // Capture the entire line for context
       let start = code.lastIndexOf('\n', position - 1) + 1;
       let end = code.indexOf('\n', position);
       if (end === -1) { end = code.length; } // Handle case where no newline at end

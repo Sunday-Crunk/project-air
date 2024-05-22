@@ -61,6 +61,7 @@ export const NoughtsCrosses = AirComponent('noughts-crosses', function() {
 
     for (const pattern of winPatterns) {
       const [a, b, c] = pattern;
+      
       if (board[a] && board[a] === board[b] && board[a] === board[c]) {
         setWinner(board[a]);
         highlightWinner(pattern);
@@ -68,7 +69,7 @@ export const NoughtsCrosses = AirComponent('noughts-crosses', function() {
       }
     }
   };
-
+  console.log("board 1:", board[1])
   const handleCellClick = (index) => {
     if (board[index] || winner) return; // Prevent update if cell is already filled or game is over
     const newBoard = [...board];
