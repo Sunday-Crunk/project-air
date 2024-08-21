@@ -1,5 +1,8 @@
 {
   "dependencies": {
-    "http-server": "^14.1.1"
+    "acorn": "^8.12.1",
+    "express": "^4.19.2",
+    "http-server": "^14.1.1",
+    "iconify-icon": "^2.1.0"
   }
 }

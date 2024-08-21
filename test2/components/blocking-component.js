@@ -14,7 +14,7 @@ export const SlowComponent = AirComponent('slow-component', function({count, thi
       console.log("i blocked")
       this.props.setCount(this.props.count+1)
     }))
-    //blockingCall(); // Introduce blocking call during render
+    blockingCall(); // Introduce blocking call during render
     return () => {
       
   
@@ -50,7 +50,7 @@ export const StylishCounter = AirComponent('stylish-counter', function() {
       backgroundColor: theme.colors.background,
       boxShadow: theme.boxShadow,
       transition: 'transform 0.2s',
-      ':hover': {
+      _hover: {
         transform: 'scale(1.05)'
       }
     }),
@@ -64,7 +64,7 @@ export const StylishCounter = AirComponent('stylish-counter', function() {
       cursor: 'pointer',
       margin: '10px 0',
       transition: 'background-color 0.3s',
-      ':hover': {
+      _hover: {
         backgroundColor: theme.colors.secondary
       }
     }),

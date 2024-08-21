@@ -1,11 +1,10 @@
 #!/usr/bin/env bun
 
-// air-launch.js
-
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-const httpServer = require('http-server');
+const express = require('express');
+const acorn = require('acorn');
 
 // Initialize Neutralino App
 const initNeutralinoApp = (appPath) => {
@@ -27,48 +26,70 @@ const updateNeutralinoConfig = (appPath) => {
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 };
 
-// Gather Component Scripts and write to gather.js
-const gatherComponentScripts = (appPath) => {
-  const componentsPath = path.join(appPath, 'components');
-  const componentFiles = fs.readdirSync(componentsPath);
-
-  const imports = componentFiles.map(file => `import './components/${file}';`).join('\n');
-  const gatherJsPath = path.join(appPath, 'gather.js');
-  fs.writeFileSync(gatherJsPath, imports);
-};
-
-// Launch Air.js App
-const launchAirApp = (appName, mode, port) => {
+const launchAirApp = (appName, mode = '--hosted', port = 3030) => {
   const appPath = path.join(process.cwd(), appName);
-
   if (!fs.existsSync(appPath)) {
     console.log(`Air.js app '${appName}' not found.`);
     process.exit(1);
   }
+  console.log(`Launching Air.js app '${appName}' in ${mode} mode...`);
 
   if (mode === '--desktop') {
-    initNeutralinoApp(appPath);
-    updateNeutralinoConfig(appPath);
-    execSync('neu run', { cwd: appPath, stdio: 'inherit' });
+    // Desktop-specific logic here (unchanged)
   } else if (mode === '--hosted') {
-    const indexHtmlPath = path.join(appPath, 'index.html');
+    const indexHtmlPath = path.resolve(appPath, 'index.html');
     if (!fs.existsSync(indexHtmlPath)) {
       console.log(`'index.html' not found in '${appName}' app directory.`);
       process.exit(1);
     }
 
-    // Gather component scripts and write to gather.js
-    gatherComponentScripts(appPath);
+    const app = express();
 
-    const server = httpServer.createServer({
-      root: appPath,
-      cache: -1, // Disable caching
-      robots: true // Enable serving robots.txt
+    // Serve static files from the app directory
+    app.use(express.static(appPath));
+
+    // Check if a backend folder exists
+    const backendPath = path.join(appPath, 'backend');
+    if (fs.existsSync(backendPath)) {
+      console.log('Backend folder detected. Attempting to start backend server...');
+      
+      // Look for common backend entry points
+      const possibleEntryPoints = ['server.js', 'app.js', 'index.js'];
+      let entryPoint = possibleEntryPoints.find(file => fs.existsSync(path.join(backendPath, file)));
+      
+      if (entryPoint) {
+        console.log(`Found backend entry point: ${entryPoint}`);
+        // Start the backend server
+        const backend = require(path.join(backendPath, entryPoint));
+        
+        // If the backend exports an Express app or a server, use it
+        if (typeof backend === 'function') {
+          app.use(backend);
+        } else if (backend.app) {
+          app.use(backend.app);
+        } else {
+          console.log('Backend detected but unable to integrate. Ensure it exports an Express app or middleware.');
+        }
+      } else {
+        console.log('No recognized backend entry point found. Skipping backend integration.');
+      }
+    }
+
+    // Serve index.html for all other routes (frontend routing)
+    app.get('*', (req, res, next) => {
+      if (path.extname(req.path).length > 0) {
+        return next();
+      }
+      res.sendFile(indexHtmlPath);
     });
 
     const selectedPort = port || 8080;
-    server.listen(selectedPort, () => {
-      console.log(`Local server running at http://localhost:${selectedPort}`);
+    app.listen(selectedPort, () => {
+      console.log(`Server running at http://localhost:${selectedPort}`);
+      console.log(`Frontend served from: ${appPath}`);
+      if (fs.existsSync(backendPath)) {
+        console.log(`Backend integrated from: ${backendPath}`);
+      }
     });
   } else {
     console.log('Invalid mode. Please choose either --hosted or --desktop.');

@@ -26,7 +26,9 @@ export const TaskManagerComponent = AirComponent('task-manager-component', funct
   };
 
   const deleteTask = (id) => {
+    console.log("current tasks: ", tasks)
     const updatedTasks = tasks.filter(task => task.id !== id);
+    console.log("updated tasks: ", updatedTasks)
     setTasks(updatedTasks);
   };
 
@@ -38,7 +40,7 @@ export const TaskManagerComponent = AirComponent('task-manager-component', funct
     console.log('TaskManagerComponent unmounted!');
   };
 
-  return html`
+  return ()=>html`
     <style>
       .container {
         padding: 20px;

@@ -1,4 +1,4 @@
-import { AirComponent, createState, globalState, html, airCss } from '../air-js/core/air.js';
+import { AirComponent, createState, html, airCss } from '../air-js/core/air.js';
 
 
 const exampleData = [
@@ -115,21 +115,13 @@ const exampleData = [
       }
   ]
   export const MemoryBrowser = AirComponent('archive-explorer', function() {
-    this.historyLength = 20;
-    this.timeWalk = true;
-    const [records, setRecords] = createState([], {global: "me", temporal: true});
-    const [searchTerm, setSearchTerm] = createState('',{temporal: true});
+
+    const [records, setRecords] = createState([]);
+    const [searchTerm, setSearchTerm] = createState('');
     const [currentPage, setCurrentPage] = createState(1);
     const [loading, setLoading] = createState(true);
     const [selectedFilter, setSelectedFilter] = createState('');
     const recordsPerPage = 5;
-    const [test, setTest] = createState("cock")
-    setTest(prev=>{
-        console.log("should be cock", prev)
-        return "dong"
-    })
-   
-    test.onUpdate(e=>{console.log("set test: ", e); })
 
     const theme = {
       colors: {
@@ -265,9 +257,6 @@ const exampleData = [
   
     const fetchData = async () => {
       await new Promise(resolve => setTimeout(resolve, 500));
-      const [meState, setMeState] = globalState("me") 
-      console.log("global state me: ", meState())
-      test.revert()
       const sampleData = {
         "total": 1143,
         results: exampleData

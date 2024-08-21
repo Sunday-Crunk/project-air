@@ -1,0 +1,31 @@
+[
+  {
+    "id": "a32040a9-7c10-485e-9713-5283f7ffa1cb",
+    "title": "Test Note",
+    "content": "Hi",
+    "category": "Work",
+    "status": "To Do"
+  },
+  {
+    "id": "a32040a9-7c10-485e-9713-dddddddddddd",
+    "title": "Test Note 2",
+    "content": "Hilo",
+    "category": "Work",
+    "status": "To Do"
+  },
+  {
+    "id": "dc6bbd79-12d2-41d8-b68c-d0c608ae1166",
+    "title": "sdmeg",
+    "content": "",
+    "createdAt": "2024-08-15T16:00:08.224Z"
+  },
+  {
+    "id": "301d0831-0b66-4086-afa9-ea235f34b98f",
+    "title": "Goober",
+    "content": "",
+    "status": "To Do",
+    "category": "Personal",
+    "createdAt": "2024-08-15T16:03:36.535Z",
+    "updatedAt": "2024-08-15T16:39:04.329Z"
+  }
+]

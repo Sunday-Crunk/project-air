@@ -51,7 +51,7 @@ export const RecipeFinder = AirComponent('recipe-finder', function() {
         borderRadius: '5px',
         boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
         cursor: 'pointer',
-        __hover:{
+        _hover:{
             font:{
                 color: "magenta",
                 size: "69pt"
